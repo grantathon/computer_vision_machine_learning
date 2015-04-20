@@ -28,8 +28,7 @@ def read_mnist(path, dataset):
 
     N = size
     labels = np.zeros(shape=N, dtype='int8')
-    # labels = np.zeros(shape=(N, 1), dtype='int8')
-    images = np.zeros(shape=(N, rows * cols), dtype='uint8')
+    images = np.zeros(shape=(N, rows*cols), dtype='uint8')
     for i in range(N):
         labels[i] = label_raw[i]
         images[i] = np.array(image_raw[i*rows*cols : (i + 1)*rows*cols])

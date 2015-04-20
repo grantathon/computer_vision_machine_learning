@@ -1,13 +1,13 @@
-from sklearn import svm, tree, ensemble, grid_search
+from sklearn import svm, tree, ensemble, grid_search, cross_validation
 import numpy as np
 
 
-def train_classifier(clf_name, labels, examples, num_samples=None, optimize=False):
+def train_classifier(clf_name, labels, examples, num_samples=None, optimize=False, cross_validate=False):
     if optimize:
-        print 'Training the classifier w/optimization...'
+        print 'Training the classifier w/optimization...\n'
         clf = optimize_classifier(opt_method='grid', clf_name=clf_name)
     else:
-        print 'Training the classifier w/o optimization...'
+        print 'Training the classifier w/o optimization...\n'
         if clf_name == 'svm':
             clf = svm.SVC()
         elif clf_name == 'tree':
@@ -22,14 +22,22 @@ def train_classifier(clf_name, labels, examples, num_samples=None, optimize=Fals
 
     clf.fit(examples[0:num_samples], labels[0:num_samples])
 
-    return clf
+    # Cross-validate classifier
+    if cross_validate:
+        print 'Running k-fold cross-validation...\n'
+        avg, std = cross_validate_classifier(labels=labels[0:num_samples], examples=examples[0:num_samples], clf=clf)
+    else:
+        avg = None
+        std = None
+
+    return clf, avg, std
 
 
 def test_classifier(labels, examples, clf):
     size = len(labels)
     correct_predictions = np.ndarray(shape=size)
 
-    print 'Testing the classifier...'
+    print 'Testing the classifier...\n'
     for i in range(size):
         result = clf.predict(examples[i])
 
@@ -79,10 +87,16 @@ def optimize_classifier(opt_method, clf_name):
             raise ValueError, 'Unexpected classifier name %s' % (clf_name)
 
         clf = grid_search.GridSearchCV(estimator=estimator, param_grid=param_grid, scoring='accuracy')
-    elif opt_method == 'random':
-        pass
+    # elif opt_method == 'random':
+    #     pass
     else:
         print "Unexpected optimization method %s" % (opt_method)
         exit(1)
 
     return clf
+
+
+def cross_validate_classifier(labels, examples, clf, k=5):
+    scores = cross_validation.cross_val_score(clf, examples, labels, cv=k, scoring='accuracy')
+
+    return scores.mean(), scores.std()*2
