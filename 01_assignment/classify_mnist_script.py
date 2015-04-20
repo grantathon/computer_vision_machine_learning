@@ -1,6 +1,6 @@
 from pprint import pprint
 from read_mnist import *
-from learn_mnist import *
+from classify_mnist import *
 
 if len(sys.argv) != 5:
     print "Please provide valid input parameters ([classifier name] [path to MNIST files] [number of samples] [optimize])"
@@ -16,7 +16,7 @@ optimize = bool(int(sys.argv[4]))
 train_labels, train_images = read_mnist(path, 'training')
 test_labels, test_images = read_mnist(path, 'testing')
 
-# Build the MNIST SVM
+# Build the MNIST classifier
 clf = train_classifier(clf_name=clf_name,
                        labels=train_labels,
                        examples=train_images,
@@ -29,7 +29,7 @@ if optimize:
     pprint(clf.best_params_)
 print
 
-# Test the MNIST SVM
+# Test the MNIST classifier
 stats = test_classifier(labels=test_labels, examples=test_images, clf=clf)
 print '\nTesting Results:'
 pprint(stats)
