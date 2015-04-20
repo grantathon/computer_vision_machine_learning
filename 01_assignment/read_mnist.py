@@ -27,7 +27,8 @@ def read_mnist(path, dataset):
         image_raw = array('B', f.read())
 
     N = size
-    labels = np.zeros(shape=(N, 1), dtype='int8')
+    labels = np.zeros(shape=N, dtype='int8')
+    # labels = np.zeros(shape=(N, 1), dtype='int8')
     images = np.zeros(shape=(N, rows * cols), dtype='uint8')
     for i in range(N):
         labels[i] = label_raw[i]
@@ -36,14 +37,11 @@ def read_mnist(path, dataset):
     return labels, images
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print "Please provide valid input parameters ([path to MNIST files] ['training' or 'testing' (optional)])"
+    if len(sys.argv) !=3:
+        print "Please provide valid input parameters ([path to MNIST files] ['training' or 'testing'])"
         exit(1)
     path = sys.argv[1]
-    if len(sys.argv) == 3:
-        dataset = sys.argv[1]
-    else:
-        dataset = 'training'
+    dataset = sys.argv[2]
 
     # Convert MNIST binary to image and save to file
     labels, images = read_mnist(path=path, dataset=dataset)
