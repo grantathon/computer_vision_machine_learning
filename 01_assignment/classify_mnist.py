@@ -9,11 +9,12 @@ def train_classifier(clf_name, labels, examples, num_samples=None, optimize=Fals
     else:
         print 'Training the classifier w/o optimization...\n'
         if clf_name == 'svm':
-            clf = svm.SVC()
+            clf = svm.SVC(kernel='poly', degree=2)
         elif clf_name == 'tree':
-            clf = tree.DecisionTreeClassifier()
+            clf = tree.DecisionTreeClassifier(criterion='entropy', max_depth=10)
         elif clf_name == 'forest':
-            clf = ensemble.RandomForestClassifier()
+            clf = ensemble.RandomForestClassifier(criterion='entropy', max_depth=10, max_features='auto',
+                                                  n_estimators=40)
         else:
             raise ValueError, 'ERROR: Unknown classifier name %s' % (clf_name)
 
@@ -68,18 +69,18 @@ def optimize_classifier(opt_method, clf_name):
         elif clf_name == 'tree':
             param_grid = [
                 {'criterion': ['gini'], 'max_depth': [None, 5, 6, 7, 8, 9, 10],
-                 'max_features': [None, 10, 20, 30, 40, 50]},
+                 'max_features': [None, 'auto', 'sqrt', 'log2']},
                 {'criterion': ['entropy'], 'max_depth': [None, 5, 6, 7, 8, 9, 10],
-                 'max_features': [None, 10, 20, 30, 40, 50]}
+                 'max_features': [None, 'auto', 'sqrt', 'log2']}
             ]
 
             estimator = tree.DecisionTreeClassifier()
         elif clf_name == 'forest':
             param_grid = [
                 {'criterion': ['gini'], 'max_depth': [None, 5, 6, 7, 8, 9, 10], 'n_estimators': [10, 20, 30, 40, 50],
-                 'max_features': [None, 10, 20, 30, 40, 50]},
+                 'max_features': [None, 'auto', 'sqrt', 'log2']},
                 {'criterion': ['entropy'], 'max_depth': [None, 5, 6, 7, 8, 9, 10], 'n_estimators': [10, 20, 30, 40, 50],
-                 'max_features': [None, 10, 20, 30, 40, 50]}
+                 'max_features': [None, 'auto', 'sqrt', 'log2']}
             ]
 
             estimator = ensemble.RandomForestClassifier()

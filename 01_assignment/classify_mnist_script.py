@@ -1,4 +1,5 @@
 from pprint import pprint
+import matplotlib.pyplot as plt
 from read_mnist import *
 from classify_mnist import *
 
@@ -42,3 +43,13 @@ if cross_validate:
 stats = test_classifier(labels=test_labels, examples=test_images, clf=clf)
 print 'Testing Results:'
 pprint(stats)
+
+# Visualizations
+if (clf_name == 'tree' or clf_name == 'forest') and not optimize:
+    importances = clf.feature_importances_
+    importances = importances.reshape((28, 28))
+
+    # Plot pixel importances
+    plt.matshow(importances, cmap=plt.cm.hot)
+    plt.title("Pixel importances for %s classifier" % clf_name)
+    plt.show()
