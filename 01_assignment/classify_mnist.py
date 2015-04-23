@@ -11,7 +11,7 @@ def train_classifier(clf_name, labels, examples, num_samples=None, optimize=Fals
         if clf_name == 'svm':
             clf = svm.SVC(kernel='poly', degree=2)
         elif clf_name == 'tree':
-            clf = tree.DecisionTreeClassifier(criterion='entropy', max_depth=10)
+            clf = tree.DecisionTreeClassifier()
         elif clf_name == 'forest':
             clf = ensemble.RandomForestClassifier(criterion='entropy', max_depth=10, max_features='auto',
                                                   n_estimators=40)
