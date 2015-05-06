@@ -15,7 +15,6 @@ if __name__ == "__main__":
 	# Make sure that caffe is on the python path:
 	home_dir = expanduser("~")
 	caffe_root = home_dir + '/caffe'  # this file is expected to be in {caffe_root}/examples
-
 	sys.path.insert(0, caffe_root + '/python')
 
 	import caffe
@@ -36,7 +35,7 @@ if __name__ == "__main__":
 	net = caffe.Classifier(MODEL_FILE, PRETRAINED,
 	                       mean=np.load(caffe_root + '/python/caffe/imagenet/ilsvrc_2012_mean.npy').mean(1).mean(1),
 	                       channel_swap=(2,1,0),
-	                       raw_scale=255,
+	                       raw_scale=511,
 	                       image_dims=(256, 256))
 
 	# Display input image
@@ -45,24 +44,14 @@ if __name__ == "__main__":
 	plt.imshow(input_image)
 	plt.title('Input Image and Class Prediction Histogram')
 
-	# Predict the classification of the image and display stats
+	# Predict the classification of the image
 	prediction = net.predict([input_image])  # predict takes any number of images, and formats them for the Caffe net automatically
 
-	# Display class prediction histogram
+	# Display class prediction histogram based on softmax probability
 	plt.subplot(2, 1, 2)
 	plt.plot(prediction[0])
 	plt.ylabel('Probability')
 	plt.xlabel('Class Index')
-
-	# plt.show()
-
-	# if not os.path.isfile(CLASS_IDX_MAP):
-	#     print("Downloading ImageNet class index to name map...")
-	#     del sys.argv[:]
-	#     print sys.argv
-	#     sys.argv.append(caffe_root + '/data/ilsvrc12/')
-	#     print sys.argv
-	#     execfile(caffe_root + '/data/ilsvrc12/get_ilsvrc_aux.sh')
 	
 	# Retrieve the name and ID for each class
 	with open(caffe_root + '/data/ilsvrc12/synset_words.txt') as f:
@@ -75,16 +64,16 @@ if __name__ == "__main__":
 
 	# Join predictions with proper names and IDs
 	labels_df.sort('synset_id')
-	predictions_df = pd.DataFrame(data=prediction[0], columns=['probability'])
+	predictions_df = pd.DataFrame(data=prediction[0], columns=['softmax'])
 	predictions_df = predictions_df.join(labels_df)
 
 	# Find the top prediction and display stats
 	prediction = predictions_df.iloc[prediction[0].argmax()]
-	prediction_entropy = -np.array([e*np.log(e) for e in predictions_df['probability']]).sum()
+	prediction_entropy = -np.array([e*np.log(e) for e in predictions_df['softmax']]).sum()
 	print '\nPrediction:'
 	print '    Class name:    %s' % (prediction['name'])
 	print '    Synset ID:     %s' % (prediction['synset_id'])
-	print '    Probability:   %f' % (prediction['probability'])
+	print '    Softmax:       %f' % (prediction['softmax'])
 	print '    Entropy:       %f' % (prediction_entropy)
 
 	plt.show()
