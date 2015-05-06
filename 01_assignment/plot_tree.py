@@ -3,7 +3,7 @@ from sklearn import tree
 from sklearn.externals.six import StringIO
 import pydot
 
-path = '../data'
+path = './data'
 num_sample = -1
 
 train_labels, train_images = read_mnist(path, 'training')
