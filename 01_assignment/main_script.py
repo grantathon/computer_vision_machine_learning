@@ -4,7 +4,7 @@ from read_mnist import *
 from classify_mnist import *
 
 if len(sys.argv) != 6:
-    print "Please provide valid input parameters ([classifier name] [path to MNIST files] [number of samples]" \
+    print "Please provide valid input parameters ([classifier name] [path to MNIST files] [number of samples] " \
           "[optimize] [cross-validate])"
     exit(1)
 
@@ -27,6 +27,7 @@ clf, avg, std = train_classifier(clf_name=clf_name,
                                  num_samples=num_samples,
                                  optimize=optimize,
                                  cross_validate=cross_validate)
+
 print 'Hyper-Parameters:'
 pprint(clf.get_params())
 if optimize:

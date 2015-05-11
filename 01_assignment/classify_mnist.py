@@ -15,6 +15,10 @@ def train_classifier(clf_name, labels, examples, num_samples=None, optimize=Fals
         elif clf_name == 'forest':
             clf = ensemble.RandomForestClassifier(criterion='entropy', max_depth=10, max_features='auto',
                                                   n_estimators=40)
+        elif clf_name == 'adaboost':
+            clf = ensemble.AdaBoostClassifier(algorithm='SAMME.R', n_estimators=100, learning_rate=0.2)
+        elif clf_name == 'gradientboost':
+            clf = ensemble.GradientBoostingClassifier(learning_rate=0.2, n_estimators=150)
         else:
             raise ValueError, 'ERROR: Unknown classifier name %s' % (clf_name)
 
@@ -84,6 +88,28 @@ def optimize_classifier(opt_method, clf_name):
             ]
 
             estimator = ensemble.RandomForestClassifier()
+        elif clf_name == 'adaboost':
+            param_grid = [
+                {'algorithm': ['SAMME'], 'n_estimators': [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                 'learning_rate': [0.2, 0.4, 0.6, 0.8, 1]},
+                {'algorithm': ['SAMME.R'], 'n_estimators': [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                 'learning_rate': [0.2, 0.4, 0.6, 0.8, 1]}
+            ]
+
+            estimator = ensemble.AdaBoostClassifier()
+        elif clf_name == 'gradientboost':
+            param_grid = [
+                {'loss': ['deviance'], 'n_estimators': [50, 100, 150, 200],
+                 'learning_rate': [0.2, 0.4, 0.6, 0.8, 1], 'max_depth': [2, 3, 4, 5, 6, 7]},
+                # {'loss': ['exponential'], 'n_estimators': [50, 100, 150, 200],
+                #  'learning_rate': [0.2, 0.4, 0.6, 0.8, 1], 'max_depth': [2, 3, 4, 5, 6, 7]},
+                # {'loss': ['deviance'], 'n_estimators': [50, 100, 150, 200, 250, 300],
+                #  'learning_rate': [0.2, 0.4, 0.6, 0.8, 1], 'max_depth': [2, 3, 4, 5, 6, 7, 8, 9, 10]},
+                # {'loss': ['exponential'], 'n_estimators': [50, 100, 150, 200, 250, 300],
+                #  'learning_rate': [0.2, 0.4, 0.6, 0.8, 1], 'max_depth': [2, 3, 4, 5, 6, 7, 8, 9, 10]},
+            ]
+
+            estimator = ensemble.GradientBoostingClassifier()
         else:
             raise ValueError, 'Unexpected classifier name %s' % (clf_name)
 
