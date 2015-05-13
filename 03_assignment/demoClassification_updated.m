@@ -1,3 +1,5 @@
+%  This code is a modified version of public code provided by http://www.gaussianprocess.org/gpml/code/matlab/doc/
+
 disp('See http://www.gaussianprocess.org/gpml/code/matlab/doc/ for details.')
 disp('Hit any key to continue...'); pause
 

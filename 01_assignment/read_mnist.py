@@ -1,3 +1,5 @@
+#  This code is a modified version of public code provided by http://abel.ee.ucla.edu/cvxopt/_downloads/mnist.py
+
 import os
 import sys
 import struct
