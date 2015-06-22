@@ -4,8 +4,8 @@ from pprint import pprint
 
 
 class HierarchicalRandomForest(object):
-    def __init__(self, n_estimators=100):
-        self.classifiers = [ensemble.RandomForestClassifier(n_estimators=n_estimators) for i in range(0, 3)]
+    def __init__(self, n_estimators=100, n_procs=1):
+        self.classifiers = [ensemble.RandomForestClassifier(n_estimators=n_estimators, n_jobs=n_procs) for i in range(0, 3)]
 
     def train(self, training_labels, training_examples):
         # Train all three chained random forests
@@ -26,11 +26,8 @@ class HierarchicalRandomForest(object):
         size = len(test_labels)
         correct_predictions = np.ndarray(size)
         for i in range(size):
-            # result = clf.predict(examples[i, :])
-
             # Record prediction accuracy
             if results[i] == test_labels[i, 2]:
-            # if result == labels[i, 0]:
                 correct_predictions[i] = True
             else:
                 correct_predictions[i] = False

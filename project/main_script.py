@@ -1,10 +1,9 @@
 import os
 import sys
-from pprint import pprint
-import matplotlib.pyplot as plt
 from HierarchicalRandomForest import *
 import numpy as np
 import json
+import multiprocessing as mp
 from pprint import pprint
 
 if len(sys.argv) != 5:
@@ -18,6 +17,7 @@ testing_cnt = int(sys.argv[3])
 optimize = bool(int(sys.argv[4]))
 
 # Constants
+NUM_PROCS = mp.cpu_count()
 NUM_FEATURES = 4096
 HIGH_LEVEL_CLASS_TO_INDEX_FILE = "high_level_class_to_index_map.json"
 LOW_LEVEL_CLASS_TO_INDEX_FILE = "low_level_class_to_index_map.json"
@@ -82,7 +82,7 @@ test_examples[np.isnan(test_examples)] = 0
 test_examples[np.isinf(test_examples)] = 0
 
 # Build, train, and test the hierarchical RF classifier
-classifier = HierarchicalRandomForest()
+classifier = HierarchicalRandomForest(n_procs=NUM_PROCS)
 print 'Training the hierarchical random forest classifier...\n'
 classifier.train(train_labels, train_examples)
 print 'Testing the hierarchical random forest classifier...\n'
