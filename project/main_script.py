@@ -50,14 +50,14 @@ testing_offset = 0
 for root, dir, files in os.walk(path):
     num_files = len(files)
 
+    # Skip directories without files
+    if num_files == 0:
+        continue
+
     train_examples = np.ndarray((num_files*training_cnt, NUM_FEATURES))
     train_labels = np.ndarray((num_files*training_cnt, 3))
     test_examples = np.ndarray((num_files*testing_cnt, NUM_FEATURES))
     test_labels = np.ndarray((num_files*testing_cnt, 3))
-
-    # Skip directories without files
-    if num_files == 0:
-        continue
 
     for data_file in files:
         file_path = "./" + path + data_file
@@ -70,7 +70,7 @@ for root, dir, files in os.walk(path):
         # Assign labels for training and testing examples
         filename_wo_ext = os.path.splitext(data_file)[0]
         train_labels[training_offset:(training_offset+training_cnt)] = [[high_level_idx_map[label_map[filename_wo_ext][0]], low_level_idx_map[label_map[filename_wo_ext][1]], category_idx_map[filename_wo_ext]] for i in range(0, training_cnt)]
-        test_labels[testing_offset:(testing_offset+testing_cnt)] = train_labels[testing_offset:(testing_offset+testing_cnt)]
+        test_labels[testing_offset:(testing_offset+testing_cnt)] = [[high_level_idx_map[label_map[filename_wo_ext][0]], low_level_idx_map[label_map[filename_wo_ext][1]], category_idx_map[filename_wo_ext]] for i in range(0, testing_cnt)]
 
         training_offset += training_cnt
         testing_offset += testing_cnt
@@ -82,10 +82,13 @@ test_examples[np.isnan(test_examples)] = 0
 test_examples[np.isinf(test_examples)] = 0
 
 # Build, train, and test the hierarchical RF classifier
-classifier = HierarchicalRandomForest(n_procs=NUM_PROCS)
+classifier = HierarchicalRandomForest(n_estimators=100, n_procs=NUM_PROCS)
 print 'Training the hierarchical random forest classifier...\n'
 classifier.train(train_labels, train_examples)
 print 'Testing the hierarchical random forest classifier...\n'
-pred_results = classifier.test(test_labels, test_examples)
+pred_results = classifier.test(test_labels=test_labels, test_examples=test_examples, num_classes=num_files)
 
-pprint(pred_results)
+# Output results
+print "Accuracy results:"
+for key, val in pred_results.iteritems():
+    print "  %s: %.4f" % (key, val)
