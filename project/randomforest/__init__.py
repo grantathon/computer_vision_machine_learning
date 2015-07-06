@@ -1,3 +1,5 @@
+# Adapted from Kevin Keraudren's code at https://github.com/kevin-keraudren/randomforest-python
+
 from tree import Tree
 from forest import Forest
 from weakLearner import *

@@ -1,3 +1,5 @@
+# Adapted from Kevin Keraudren's code at https://github.com/kevin-keraudren/randomforest-python
+
 import numpy as np
 import string
 

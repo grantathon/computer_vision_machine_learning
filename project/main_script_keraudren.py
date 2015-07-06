@@ -95,12 +95,11 @@ end_time = time.time()
 print "Finished reading the training and testing data in %f seconds.\n" % (end_time - start_time)
 
 # Build, train, and test the hierarchical RF classifier
-classifier = HierarchicalForest(n_estimators=100, n_procs=NUM_PROCS)
+classifier = HierarchicalRandomForest(n_estimators=100, n_procs=NUM_PROCS)
 
 print 'Training the hierarchical random forest classifier...'
 start_time = time.time()
 classifier.train(training_labels=train_labels, training_examples=train_examples, num_classes=num_files, optimize=optimize)
-# classifier.train_original(training_labels=train_labels, training_examples=train_examples, optimize=optimize)
 end_time = time.time()
 print "Finished training the hierarchical random forest classifier in %f seconds.\n" % (end_time - start_time)
 

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+# Adapted from Kevin Keraudren's code at https://github.com/kevin-keraudren/randomforest-python
 
 import numpy as np
 from tree import *
@@ -7,8 +7,17 @@ from glob import glob
 import itertools
 import shutil
 import multiprocessing as mp
+from pprint import pprint
 
 from weakLearner import WeakLearner, AxisAligned
+
+
+def _grow_trees(params):
+    thread_id, points, responses, labels, tree = params
+
+    tree.grow(points, responses, labels)
+    return tree
+
 
 class Forest:
     def __init__( self,
@@ -16,60 +25,39 @@ class Forest:
                   tree_params={ 'max_depth' : 10,
                            'min_sample_count' : 5,
                            'test_count' : 100,
-                           'test_class' : AxisAligned() } ):
+                           'test_class' : AxisAligned() },
+                  nprocs=1):
         self.ntrees = ntrees
         self.tree_params = tree_params
         self.trees=[]
         self.labels = []
+        self.nprocs = nprocs
 
     def __len__(self):
         return self.ntrees
         
-    def grow(self,points,responses,nprocs=1):
+    def grow(self,points,responses):
         for r in responses:
             if r not in self.labels:
                 self.labels.append(r)
 
-        if nprocs == 1:
+        if self.nprocs == 1:
             for i in range(self.ntrees):
                 self.trees.append( Tree( self.tree_params ) )
                 self.trees[i].grow( points, responses, self.labels )
         else:
-            raise NotImplementedError, "The parallel version of the forest.grow() function has yet to be implemented."
-            
-            # self.points = points
-            # self.responses = responses
-            # grow_input = np.arange(self.ntrees)
             thread_ids = np.arange(self.ntrees)
-
             grow_input = itertools.izip(
-                itertools.repeat(thread_ids),
+                thread_ids,
                 itertools.repeat(points),
                 itertools.repeat(responses),
-                itertools.repeat(self.labels)
-                # thread_ids,
-                # self.points,
-                # self.responses,
-                # self.labels
-                # itertools.repeat(trading_algo),
-                # itertools.repeat(commission),
-                # itertools.repeat(self.stop_loss_percent),
-                # itertools.repeat(tickers_spreads),
-                # itertools.repeat(data)
+                itertools.repeat(self.labels),
+                itertools.repeat(Tree(self.tree_params))
                 )
 
-            for i in range(self.ntrees):
-                self.trees.append( Tree( self.tree_params ) )
-
-            pool = mp.Pool(processes=nprocs)
-            pool.map(self.grow_trees, grow_input)
-
-    def grow_trees(self, params):
-        thread_id, points, responses, labels = params
-
-        # self.trees.append( Tree( self.tree_params ) )
-        # self.trees[thread_id].grow( self.points, self.responses, self.labels )
-        self.trees[thread_id].grow( points, responses, labels )
+            pool = mp.Pool(processes=self.nprocs)
+            results = pool.map(func=_grow_trees, iterable=grow_input)
+            self.trees = list(results)
 
     def predict(self, point, soft=False):
         r = {}

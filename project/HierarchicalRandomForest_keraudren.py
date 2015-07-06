@@ -4,7 +4,7 @@ import operator
 from pprint import pprint
 
 
-class HierarchicalForest(object):
+class HierarchicalRandomForest(object):
     def __init__(self, n_estimators=100, n_procs=1):
         # TODO: Try different parameters
         # params = {  'max_depth' : 10,
@@ -13,20 +13,13 @@ class HierarchicalForest(object):
         #             'test_class' : getattr( weakLearner, learner)()
         #          }
 
-        self.forests = [Forest(ntrees=n_estimators) for i in range(0, 3)]
+        self.forests = [Forest(ntrees=n_estimators, nprocs=n_procs) for i in range(0, 3)]
 
-    def train_original(self, training_labels, training_examples, optimize=False):
-        if optimize:
-            optimize(training_examples, training_labels)
-
-        # Train all three chained random forests
-        self.forests[2].grow(points=training_examples, responses=training_labels[:, 2], nprocs=1)
-
-    def train(self, training_labels, training_examples, num_classes, optimize=False, n_procs=1):
+    def train(self, training_labels, training_examples, num_classes, optimize=False):
         size = len(training_examples)
 
         # Train first RF hierarchy
-        self.forests[0].grow(points=training_examples, responses=training_labels[:, 0], nprocs=n_procs)
+        self.forests[0].grow(points=training_examples, responses=training_labels[:, 0])
 
         # Extract distribution from all leaves of first RF hierarchy
         prediction_probs = np.ndarray((size, 2))
@@ -34,7 +27,7 @@ class HierarchicalForest(object):
             prediction_probs[i] = self.forests[0].predict(point=training_examples[i], soft=True).values()
 
         # Train second RF hierarchy
-        self.forests[1].grow(points=prediction_probs, responses=training_labels[:, 1], nprocs=n_procs)
+        self.forests[1].grow(points=prediction_probs, responses=training_labels[:, 1])
 
         # Extract distribution from all leaves of second RF hierarchy
         temp_prediction_probs = np.ndarray((size, 4))
@@ -42,7 +35,7 @@ class HierarchicalForest(object):
             temp_prediction_probs[i] = self.forests[1].predict(point=prediction_probs[i], soft=True).values()
 
         # Train third RF hierarchy
-        self.forests[2].grow(points=temp_prediction_probs, responses=training_labels[:, 2], nprocs=n_procs)
+        self.forests[2].grow(points=temp_prediction_probs, responses=training_labels[:, 2])
 
     def test(self, test_labels, test_examples, num_classes, top_n=[1, 5]):
         if num_classes < np.max(top_n):
