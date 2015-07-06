@@ -4,10 +4,9 @@ import numpy as np
 from tree import *
 import os
 from glob import glob
-import itertools
 import shutil
+import itertools
 import multiprocessing as mp
-from pprint import pprint
 
 from weakLearner import WeakLearner, AxisAligned
 

@@ -13,11 +13,11 @@ class HierarchicalRandomForest(object):
             optimize(training_examples, training_labels)
 
         # Train all three chained random forests
-        # self.classifiers[0].fit(training_examples, training_labels[:, 0])
-        # probs = self.classifiers[0].predict_proba(training_examples)
-        # self.classifiers[1].fit(probs, training_labels[:, 1])
-        # probs = self.classifiers[1].predict_proba(probs)
-        # self.classifiers[2].fit(probs, training_labels[:, 2])
+        self.classifiers[0].fit(training_examples, training_labels[:, 0])
+        probs = self.classifiers[0].predict_proba(training_examples)
+        self.classifiers[1].fit(probs, training_labels[:, 1])
+        probs = self.classifiers[1].predict_proba(probs)
+        self.classifiers[2].fit(probs, training_labels[:, 2])
 
         # self.classifiers[0].fit(training_examples, training_labels[:, 0])
         # probs = self.classifiers[0].predict_proba(training_examples)
@@ -27,7 +27,7 @@ class HierarchicalRandomForest(object):
         # probs = self.classifiers[1].predict_proba(training_examples)
         # self.classifiers[2].fit(probs, training_labels[:, 2])
 
-        self.classifiers[2].fit(training_examples, training_labels[:, 2])
+        # self.classifiers[2].fit(training_examples, training_labels[:, 2])
 
     def test(self, test_labels, test_examples, num_classes, top_n=[1, 5]):
         if num_classes < np.max(top_n):
@@ -35,9 +35,9 @@ class HierarchicalRandomForest(object):
 
         # Extract results from the three chained random forest
         size = len(test_labels)
-        # probs = self.classifiers[0].predict_proba(test_examples)
-        # probs = self.classifiers[1].predict_proba(probs)
-        # prediction_probs = self.classifiers[2].predict_proba(probs)
+        probs = self.classifiers[0].predict_proba(test_examples)
+        probs = self.classifiers[1].predict_proba(probs)
+        prediction_probs = self.classifiers[2].predict_proba(probs)
 
         # probs = self.classifiers[0].predict_proba(test_examples)
         # prediction_probs = self.classifiers[2].predict_proba(probs)
@@ -45,7 +45,7 @@ class HierarchicalRandomForest(object):
         # probs = self.classifiers[1].predict_proba(test_examples)
         # prediction_probs = self.classifiers[2].predict_proba(probs)
 
-        prediction_probs = self.classifiers[2].predict_proba(test_examples)
+        # prediction_probs = self.classifiers[2].predict_proba(test_examples)
         
         classes = self.classifiers[2].classes_
         sorted_class_probs = []
