@@ -1,21 +1,32 @@
 from sklearn import tree, ensemble
+from randomforest import *
 import numpy as np
 from pprint import pprint
 
 
 class HierarchicalRandomForest(object):
     def __init__(self, n_estimators=100, n_procs=1):
-        self.classifiers = [ensemble.RandomForestClassifier(max_features='sqrt', n_estimators=n_estimators, n_jobs=n_procs) for i in range(0, 3)]
+        self.classifiers = [ensemble.RandomForestClassifier(n_estimators=n_estimators, n_jobs=n_procs) for i in range(0, 3)]
 
-    def train(self, training_labels, training_examples):
+    def train(self, training_labels, training_examples, optimize=False):
+        if optimize:
+            optimize(training_examples, training_labels)
+
         # Train all three chained random forests
         # self.classifiers[0].fit(training_examples, training_labels[:, 0])
         # probs = self.classifiers[0].predict_proba(training_examples)
-
         # self.classifiers[1].fit(probs, training_labels[:, 1])
         # probs = self.classifiers[1].predict_proba(probs)
-
         # self.classifiers[2].fit(probs, training_labels[:, 2])
+
+        # self.classifiers[0].fit(training_examples, training_labels[:, 0])
+        # probs = self.classifiers[0].predict_proba(training_examples)
+        # self.classifiers[2].fit(probs, training_labels[:, 2])
+
+        # self.classifiers[1].fit(training_examples, training_labels[:, 1])
+        # probs = self.classifiers[1].predict_proba(training_examples)
+        # self.classifiers[2].fit(probs, training_labels[:, 2])
+
         self.classifiers[2].fit(training_examples, training_labels[:, 2])
 
     def test(self, test_labels, test_examples, num_classes, top_n=[1, 5]):
@@ -24,11 +35,18 @@ class HierarchicalRandomForest(object):
 
         # Extract results from the three chained random forest
         size = len(test_labels)
-        # results = self.classifiers[0].predict_proba(test_examples)
-        # results = self.classifiers[1].predict_proba(results)
-        # results = self.classifiers[2].predict(results)
-        predictions = self.classifiers[2].predict(test_examples)
+        # probs = self.classifiers[0].predict_proba(test_examples)
+        # probs = self.classifiers[1].predict_proba(probs)
+        # prediction_probs = self.classifiers[2].predict_proba(probs)
+
+        # probs = self.classifiers[0].predict_proba(test_examples)
+        # prediction_probs = self.classifiers[2].predict_proba(probs)
+
+        # probs = self.classifiers[1].predict_proba(test_examples)
+        # prediction_probs = self.classifiers[2].predict_proba(probs)
+
         prediction_probs = self.classifiers[2].predict_proba(test_examples)
+        
         classes = self.classifiers[2].classes_
         sorted_class_probs = []
 
@@ -58,8 +76,20 @@ class HierarchicalRandomForest(object):
 
         return stats
 
-    def optimize(self):
+    def optimize(self, training_examples, training_labels):
         raise NotImplementedError, "The optimize() function has yet to be implemented."
+        
+        # # Initialize hyper-parameter space
+        # param_grid = [
+        #     {'criterion': ['gini'], 'max_depth': [None, 5, 6, 7, 8, 9, 10], 'n_estimators': [10, 20, 30, 40, 50, 75, 100, 150, 200],
+        #      'max_features': [None, int, float, 'auto', 'sqrt', 'log2']},
+        #     {'criterion': ['entropy'], 'max_depth': [None, 5, 6, 7, 8, 9, 10], 'n_estimators': [10, 20, 30, 40, 50, 75, 100, 150, 200],
+        #      'max_features': [None, int, float, 'auto', 'sqrt', 'log2']}
+        # ]
+
+        # # Optimize classifier over hyper-parameter space
+        # clf = grid_search.GridSearchCV(estimator=ensemble.RandomForestClassifier(), param_grid=param_grid, scoring='accuracy')
+        # self.classifiers[2] = clf
 
     def predict(self, examples):
         # Extract results from the three chained random forest

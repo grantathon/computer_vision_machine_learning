@@ -1,14 +1,17 @@
 import os
 import sys
-from HierarchicalRandomForest import *
+import time
+from HierarchicalRandomForest_sklearn import *
 import numpy as np
 import json
 import multiprocessing as mp
 from pprint import pprint
 
 if len(sys.argv) != 5:
-    print "Please provide valid input parameters ([path to files] [training count] [testing count] [optimize])"
+    print "Please provide valid input parameters ([path to files] [training count] [testing count] [optimize])\n"
     exit(1)
+
+script_start_time = time.time()
 
 # User inputs
 path = sys.argv[1]
@@ -23,6 +26,9 @@ HIGH_LEVEL_CLASS_TO_INDEX_FILE = "high_level_class_to_index_map.json"
 LOW_LEVEL_CLASS_TO_INDEX_FILE = "low_level_class_to_index_map.json"
 CATEGORY_TO_INDEX_FILE = "category_to_index_map.json"
 PLACES_CAT_LABELS_FILE = "places_category_labels.csv"
+
+print "Reading the configuration files..."
+start_time = time.time()
 
 # Initialize high-level class to index mappings
 with open(HIGH_LEVEL_CLASS_TO_INDEX_FILE) as f:
@@ -42,8 +48,12 @@ label_map = {}
 for i in range(0, len(label_data)):
     label_map[label_data[i, 0]] = label_data[i, 1:]
 
+end_time = time.time()
+print "Finished reading the configuration files in %f seconds.\n" % (end_time - start_time)
+
 # Load training and testing data
-print 'Reading the training and testing data...\n'
+print 'Reading the training and testing data...'
+start_time = time.time()
 
 training_offset = 0
 testing_offset = 0
@@ -81,14 +91,29 @@ train_examples[np.isinf(train_examples)] = 0
 test_examples[np.isnan(test_examples)] = 0
 test_examples[np.isinf(test_examples)] = 0
 
+end_time = time.time()
+print "Finished reading the training and testing data in %f seconds.\n" % (end_time - start_time)
+
 # Build, train, and test the hierarchical RF classifier
 classifier = HierarchicalRandomForest(n_estimators=100, n_procs=NUM_PROCS)
-print 'Training the hierarchical random forest classifier...\n'
-classifier.train(train_labels, train_examples)
-print 'Testing the hierarchical random forest classifier...\n'
+print 'Training the hierarchical random forest classifier...'
+start_time = time.time()
+classifier.train(training_labels=train_labels, training_examples=train_examples, optimize=optimize)
+end_time = time.time()
+print "Finished training the hierarchical random forest classifier in %f seconds.\n" % (end_time - start_time)
+
+
+print 'Testing the hierarchical random forest classifier...'
+start_time = time.time()
 pred_results = classifier.test(test_labels=test_labels, test_examples=test_examples, num_classes=num_files)
+end_time = time.time()
+print "Finished testing the hierarchical random forest classifier in %f seconds.\n" % (end_time - start_time)
 
 # Output results
 print "Accuracy results:"
 for key, val in pred_results.iteritems():
     print "  %s: %.4f" % (key, val)
+print
+
+script_end_time = time.time()
+print "Finished running script in %f seconds." % (script_end_time - script_start_time)
